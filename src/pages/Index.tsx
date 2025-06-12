@@ -20,6 +20,7 @@ import {
   Shuffle,
   Clock,
   Users,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TAROT_SPREADS } from "@/lib/tarot-data";
@@ -255,6 +256,17 @@ const Index = () => {
               <span>For Entertainment Purposes</span>
               <span>•</span>
               <span>Trust Your Inner Wisdom</span>
+            </div>
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-mystical-300 border-mystical-500/30 hover:bg-mystical-800/50 hover:text-gold-300"
+                onClick={() => navigate("/download")}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download Card Images
+              </Button>
             </div>
           </div>
         </div>

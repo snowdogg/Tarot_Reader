@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { TarotCard as TarotCardType } from "@/lib/tarot-data";
+import { WIKIMEDIA_TAROT_IMAGES } from "@/lib/tarot-images";
 
 interface TarotCardProps {
   card: TarotCardType;
@@ -26,6 +27,12 @@ const TarotCard = ({
   isSelected = false,
 }: TarotCardProps) => {
   const [isFlipped, setIsFlipped] = useState(isRevealed);
+  const [imageError, setImageError] = useState(false);
+
+  // Sync internal state with prop changes (for reveal all/hide all)
+  useEffect(() => {
+    setIsFlipped(isRevealed);
+  }, [isRevealed]);
 
   const handleClick = () => {
     if (onFlip) {
@@ -88,16 +95,43 @@ const TarotCard = ({
             <div className="w-full h-full bg-gradient-to-br from-white to-gray-50 rounded-lg border border-gray-200 overflow-hidden">
               {/* Card Image Area */}
               <div className="h-3/4 relative bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
-                <img
-                  src={card.imageUrl}
-                  alt={card.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    // Fallback to gradient background if image fails
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-br from-mystical-500/20 to-cosmic-500/20"></div>
+                {!imageError ? (
+                  <img
+                    src={card.imageUrl}
+                    alt={card.name}
+                    className="w-full h-full object-cover"
+                    onError={() => setImageError(true)}
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-mystical-500/30 to-cosmic-500/30 text-mystical-700">
+                    <div className="text-center p-4">
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-mystical-400/30 flex items-center justify-center">
+                        <div className="text-2xl">
+                          {card.type === "major"
+                            ? "🌟"
+                            : card.suit === "wands"
+                              ? "🔥"
+                              : card.suit === "cups"
+                                ? "💧"
+                                : card.suit === "swords"
+                                  ? "⚔️"
+                                  : "💰"}
+                        </div>
+                      </div>
+                      <div className="text-sm font-bold mb-1">{card.name}</div>
+                      <div className="text-xs opacity-70 mb-2">
+                        {card.type === "major"
+                          ? "Major Arcana"
+                          : `${card.suit?.charAt(0).toUpperCase()}${card.suit?.slice(1)}`}
+                        {card.number !== undefined && ` ${card.number}`}
+                      </div>
+                      <div className="text-xs opacity-50 italic">
+                        Image Loading...
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-br from-mystical-500/10 to-cosmic-500/10"></div>
 
                 {/* Card Type Badge */}
                 <Badge
@@ -118,23 +152,6 @@ const TarotCard = ({
           </div>
         </div>
       </Card>
-
-      {/* Card Meaning - Shows when expanded */}
-      {showMeaning && isFlipped && (
-        <Card className="absolute top-full left-1/2 transform -translate-x-1/2 mt-4 w-64 p-4 bg-white/95 backdrop-blur-sm border border-mystical-200 shadow-xl z-50 animate-in slide-in-from-top-2">
-          <div className="space-y-2">
-            <h4 className="font-bold text-mystical-800">{card.name}</h4>
-            <div className="flex flex-wrap gap-1">
-              {card.keywords.map((keyword, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {keyword}
-                </Badge>
-              ))}
-            </div>
-            <p className="text-sm text-gray-700">{card.uprightMeaning}</p>
-          </div>
-        </Card>
-      )}
     </div>
   );
 };
